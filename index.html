@@ -9,6 +9,11 @@
             line-height: 250%;
             padding: 100px 0;
          }
+         #player{
+            width: 80px;
+            padding: 10px;
+            margin-bottom: 20px;
+         }
          input[type="range"]{
             width:600px;
          }
@@ -16,7 +21,8 @@
    </head>
    <body>
       <div class="container">
-         <audio id="audio" src="laun.mp3" controls loop></audio>
+         <audio id="audio" src="laun.mp3" loop></audio>
+         <button id="player">play</button>
          <br>
          X : <input id="x-pos" type="range" value="0" min="-10" max="10" step="0.1" disabled>
          <br>
@@ -29,11 +35,22 @@
    
    <script>
       var audio = document.getElementById('audio');
+      var player = document.getElementById('player');
       var xPos = document.getElementById('x-pos');
       var yPos = document.getElementById('y-pos');
       var zPos = document.getElementById('z-pos');
       var val = document.getElementById('val');
       val.textContent = `X : ${xPos.value * 10} %\nY : ${yPos.value * 10} %\nZ : ${zPos.value * 10} %`;
+
+      player.addEventListener('click', () => {
+         if(audio.paused){
+            audio.play();
+            player.textContent = 'pause';
+         } else{
+            audio.pause();
+            player.textContent = 'play';
+         }
+      });
 
       audio.addEventListener('play', () => {
          xPos.removeAttribute('disabled', '');
