@@ -9,7 +9,7 @@
             line-height: 250%;
             padding: 100px 0;
          }
-         #player{
+         button{
             width: 80px;
             padding: 10px;
             margin-bottom: 20px;
@@ -30,6 +30,7 @@
          <br>
          Z : <input id="z-pos" type="range" value="0" min="-10" max="10" step="0.1" disabled>
          <pre id="val"></pre>
+         <button id="reset" disabled>reset</button>
       </div>
    </body>
    
@@ -40,7 +41,11 @@
       var yPos = document.getElementById('y-pos');
       var zPos = document.getElementById('z-pos');
       var val = document.getElementById('val');
+      var reset = document.getElementById('reset');
+
       val.textContent = `X : ${xPos.value * 10} %\nY : ${yPos.value * 10} %\nZ : ${zPos.value * 10} %`;
+      var audioCtx = null;
+      var panner;
 
       player.addEventListener('click', () => {
          if(audio.paused){
@@ -50,36 +55,46 @@
             audio.pause();
             player.textContent = 'play';
          }
+
+         if(audioCtx === null){
+            audioCtx = new AudioContext();
+            panner = audioCtx.createPanner(); //立体音響のAudioNodeを作成
+            var source = audioCtx.createMediaElementSource(audio); //getUserMediaの場合はcreateMediaStreamSource
+
+            panner.panningModel = 'HRTF';
+            panner.distanceModel = 'exponential';
+            panner.rolloffFactor = '0.7'; //どれだけ早く減少するか
+
+            source.connect(panner);
+            panner.connect(audioCtx.destination);
+
+            xPos.removeAttribute('disabled', '');
+            yPos.removeAttribute('disabled', '');
+            zPos.removeAttribute('disabled', '');
+            reset.removeAttribute('disabled', '');
+         }
       });
 
-      audio.addEventListener('play', () => {
-         xPos.removeAttribute('disabled', '');
-         yPos.removeAttribute('disabled', '');
-         zPos.removeAttribute('disabled', '');
-
-         var audioCtx = new AudioContext();
-         var panner = audioCtx.createPanner(); //立体音響のAudioNodeを作成
-         var source = audioCtx.createMediaElementSource(audio); //getUserMediaの場合はcreateMediaStreamSource
-
-         panner.panningModel = 'HRTF';
-         panner.distanceModel = 'exponential';
-         panner.rolloffFactor = '0.7'; //どれだけ早く減少するか
-
-         source.connect(panner);
-         panner.connect(audioCtx.destination);
-
-         xPos.addEventListener('input', () => {
-            panner.positionX.value = xPos.value * 2;
-            val.textContent = `X : ${xPos.value * 10} %\nY : ${yPos.value * 10} %\nZ : ${zPos.value * 10} %`;
-         });
-         yPos.addEventListener('input', () => {
-            panner.positionY.value = yPos.value * 2;
-            val.textContent = `X : ${xPos.value * 10} %\nY : ${yPos.value * 10} %\nZ : ${zPos.value * 10} %`;
-         });
-         zPos.addEventListener('input', () => {
-            panner.positionZ.value = zPos.value * 2;
-            val.textContent = `X : ${xPos.value * 10} %\nY : ${yPos.value * 10} %\nZ : ${zPos.value * 10} %`;
-         });
+      xPos.addEventListener('input', () => {
+         panner.positionX.value = xPos.value * 2;
+         val.textContent = `X : ${xPos.value * 10} %\nY : ${yPos.value * 10} %\nZ : ${zPos.value * 10} %`;
+      });
+      yPos.addEventListener('input', () => {
+         panner.positionY.value = yPos.value * 2;
+         val.textContent = `X : ${xPos.value * 10} %\nY : ${yPos.value * 10} %\nZ : ${zPos.value * 10} %`;
+      });
+      zPos.addEventListener('input', () => {
+         panner.positionZ.value = zPos.value * 2;
+         val.textContent = `X : ${xPos.value * 10} %\nY : ${yPos.value * 10} %\nZ : ${zPos.value * 10} %`;
+      });
+      reset.addEventListener('click', () => {
+         panner.positionX.value = 0;
+         panner.positionY.value = 0;
+         panner.positionZ.value = 0;
+         xPos.value = 0;
+         yPos.value = 0;
+         zPos.value = 0;
+         val.textContent = `X : ${xPos.value * 10} %\nY : ${yPos.value * 10} %\nZ : ${zPos.value * 10} %`;
       });
    </script>
 
